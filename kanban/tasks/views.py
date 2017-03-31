@@ -22,3 +22,12 @@ def view_task_detail(request, detail_id):
     serializer = TaskSerializer(specific_task, many=False)
     # permissions_classes = (permissions.IsAuthenticatedOrReadOnly,)
     return Response(serializer.data)
+
+@api_view(['GET'])
+def delete_task(request, detail_id):
+    '''delete a single task'''
+    trash_task = Task.objects.get(id=detail_id)
+    if trash_task.delete():
+        return "success"
+    else:
+        return "error"
