@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Task
 from .serializers import TaskSerializer
+from .forms import TaskForm
 
 # Create your views here.
 
@@ -31,3 +32,21 @@ def delete_task(request, detail_id):
         return "success"
     else:
         return "error"
+
+
+def new_task(request):
+    '''loads form to create a new task'''
+    new_task = TaskForm()
+    return render(request, "template/tasks/create.html", {"task_form": new_task })
+
+
+@api_view(['POST'])
+def add_task_to_DB(request, form_info):
+    ''' sends form info to db as a new task'''
+    new_task = Task(form_info)
+    data = JSONparser().parse(new_task)
+    serializer = TaskSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+        return JsonResponse(serializer.data)
+    return JsonResponse(serializer.errors, status=400)
