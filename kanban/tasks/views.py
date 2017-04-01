@@ -1,10 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rest_framework import status, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Task
 from .serializers import TaskSerializer
 from .forms import TaskForm
+from django.template import loader
 
 # Create your views here.
 
@@ -36,8 +37,15 @@ def delete_task(request, detail_id):
 
 def new_task(request):
     '''loads form to create a new task'''
-    new_task = TaskForm()
-    return render(request, "template/tasks/create.html", {"task_form": new_task })
+    if request.method == 'POST':
+        new_task = TaskForm(request.POST)
+        if new_task.is_valid():
+            new_task.save(commit=False)
+            return redirect("tasks")
+    else:
+        new_task = TaskForm()
+
+    return render(request, "tasks/create.html", { "task_form": new_task } )
 
 
 @api_view(['POST'])
@@ -49,4 +57,5 @@ def add_task_to_DB(request, form_info):
     if serializer.is_valid():
         serializer.save()
         return JsonResponse(serializer.data)
+
     return JsonResponse(serializer.errors, status=400)
