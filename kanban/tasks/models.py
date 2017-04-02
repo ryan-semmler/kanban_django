@@ -8,4 +8,3 @@ class Task(models.Model):
     title = models.CharField(max_length=250)
     status = models.CharField(max_length=20, choices=STATUS_CHOICE, default='1')
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICE, default='1')
-    # user = models.ForeignKey(User)

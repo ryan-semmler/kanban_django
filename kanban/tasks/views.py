@@ -30,7 +30,7 @@ def delete_task(request, detail_id):
     '''delete a single task'''
     trash_task = Task.objects.get(id=detail_id)
     if trash_task.delete():
-        return "success"
+        return redirect('tasks')
     else:
         return "error"
 
@@ -40,7 +40,7 @@ def new_task(request):
     if request.method == 'POST':
         new_task = TaskForm(request.POST)
         if new_task.is_valid():
-            new_task.save(commit=False)
+            new_task.save(commit=True)
             return redirect("tasks")
     else:
         new_task = TaskForm()
