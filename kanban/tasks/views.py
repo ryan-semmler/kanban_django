@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect
 from rest_framework import status, permissions
 from rest_framework.decorators import api_view
+from django.contrib.auth.decorators import login_required
 from rest_framework.response import Response
 from .models import Task
 from .serializers import TaskSerializer
 from .forms import TaskForm
 from django.template import loader
+from django.http import HttpRequest
 
 # Create your views here.
 
@@ -25,7 +27,18 @@ def view_task_detail(request, detail_id):
     # permissions_classes = (permissions.IsAuthenticatedOrReadOnly,)
     return Response(serializer.data)
 
+
 @api_view(['GET'])
+@login_required
+def user_detail(request, user_id):
+    '''view all tasks created by a specific user'''
+    user_tasks = Task.objects.get(owner_id=user_id)
+    serializer = TaskSerializer(user_tasks, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@login_required
 def delete_task(request, detail_id):
     '''delete a single task'''
     trash_task = Task.objects.get(id=detail_id)
@@ -35,17 +48,20 @@ def delete_task(request, detail_id):
         return "error"
 
 
+@login_required
 def new_task(request):
     '''loads form to create a new task'''
     if request.method == 'POST':
         new_task = TaskForm(request.POST)
         if new_task.is_valid():
-            new_task.save(commit=True)
+            # new_task.save(commit=False)
+            new_task.owner = request.user
+            new_task.save()
             return redirect("tasks")
     else:
         new_task = TaskForm()
 
-    return render(request, "tasks/create.html", { "task_form": new_task } )
+    return render(request, "tasks/create.html", {"task_form": new_task})
 
 
 @api_view(['POST'])

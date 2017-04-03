@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Task(models.Model):
@@ -8,3 +9,4 @@ class Task(models.Model):
     title = models.CharField(max_length=250)
     status = models.CharField(max_length=20, choices=STATUS_CHOICE, default='1')
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICE, default='1')
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
